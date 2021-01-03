@@ -1,28 +1,27 @@
-
 // ===============================================================================
 // DEPENDENCIES
 // We need to include the path package to get the correct file path for our html
 // ===============================================================================
-var path = require("path");
+const path = require("path");
 const { v4: uuidv4 } = require('uuid');
 const fs = require("fs");
-const dbJSON = require("./db/db.json");
 
-module.exports = function (app) {
+module.exports = app => {
 
-    fs.readFile(dbJSON, "utf8", (err, data) => {
+    fs.readFile('db/db.json', "utf8", (err, data) => {
 
+        // console.log(err);
         if (err) throw err;
 
         var notes = JSON.parse(data);
 
-        // Thammarak API Routes
+        // API Routes
         // =============================================================
-        // read the `db.json` file and return all saved notes as JSON
         app.get("/api/notes", function (req, res) {
             res.json(notes);
         });
 
+        // post new notes
         app.post("/api/notes", function (req, res) {
             // Validate request body
             if (!req.body.title) {
@@ -30,41 +29,71 @@ module.exports = function (app) {
             }
 
             // Copy request body and generate ID
-            const note = { ...req.body, id: uuidv4() }
+            let newNote = { ...req.body, id: uuidv4() }
 
             // Push note to dbJSON array - saves data in memory
-            dbJSON.push(note);
+            notes.push(newNote);
 
-            // Saves data to file by persisting in memory variable dbJSON to db.json file.
-            // This is needed because when we turn off server we loose all memory data like pbJSON variable.
-            // Saving to file allows us to read previous notes (before server was shutdown) from file.
-            fs.writeFile(path.join(__dirname, "./db/db.json"), JSON.stringify(dbJSON), (err) => {
+            fs.writeFile("db/db.json",JSON.stringify(notes,'\t'),err => {
                 if (err) {
                     return res.json({ error: "Error writing to file" });
                 }
+                return console.log("newNote added " + newNote.title);
+            });  
 
-                return res.json(note);
+        });
+
+        // // Retrieves a note with specific id
+        // app.get("/api/notes/:id", function (req, res) {
+        //     // console.log(res.json(notes[req.params.id]));
+        //     res.json(notes[req.params.id]);
+        // });
+
+        // Deletes a note with specific id
+        app.delete("/api/notes/:id", function (req, res) {
+            let deleteId = req.params.id;
+            notes = notes.filter(function (note) {
+                // console.log("note.id " + note.id);
+                return note.id != deleteId;
+            });
+            // console.log("notes " + notes);
+            console.log("Deleted note with id " + req.params.id);
+
+            fs.writeFile("db/db.json",JSON.stringify(notes,'\t'),err => {
+                if (err) {
+                    return res.json({ error: "Error writing to file" });
+                }
+                return true;
             });
         });
 
+
         // Routes
         // =============================================================
-
-        // Thammarak display notes.html
+        // Display notes.html
         app.get("/notes", function (req, res) {
-            res.sendFile(path.join(__dirname, "./public/notes.html"));
+            res.sendFile(path.join(__dirname, "../public/notes.html"));
         });
 
-        // Thammarak If no matching route default to home page
+        // If no matching route default to home page
         app.get("*", function (req, res) {
-            res.sendFile(path.join(__dirname, "./public/index.html"));
+            res.sendFile(path.join(__dirname, "../public/index.html"));
         });
 
+
+        //updates the json file whenever a note is added or deleted
+        function updateDb() {
+            fs.writeFile("db/db.json", JSON.stringify(notes, '\t'), err => {
+                if (err) throw err;
+                return true;
+            });
+        }
 
     });
 
 
 }
+
 
 
 

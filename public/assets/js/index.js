@@ -17,6 +17,8 @@ const getNotes = () => {
 
 // A function for saving a note to the db
 const saveNote = (note) => {
+  // console.log("under saveNote " + note);
+
   return $.ajax({
     url: "/api/notes",
     data: note,
@@ -55,11 +57,15 @@ const handleNoteSave = function () {
     title: $noteTitle.val(),
     text: $noteText.val(),
   };
+  console.log("before save " + newNote);
 
-  saveNote(newNote).then(() => {
+  // saveNote(newNote).then(() => {
+  saveNote(newNote);
+    // console.log("after saveNote " + saveNote);
+
     getAndRenderNotes();
     renderActiveNote();
-  });
+  // });
 };
 
 // Delete the clicked note
@@ -67,16 +73,20 @@ const handleNoteDelete = function (event) {
   // prevents the click listener for the list from being called when the button inside of it is clicked
   event.stopPropagation();
 
+  // console.log("under handleNoteDelete" + event);
   const note = $(this).parent(".list-group-item").data();
+
+  // console.log("under handleNoteDelete" + note.id);
 
   if (activeNote.id === note.id) {
     activeNote = {};
   }
 
-  deleteNote(note.id).then(() => {
+  // deleteNote(note.id).then(() => {
+  deleteNote(note.id);
     getAndRenderNotes();
     renderActiveNote();
-  });
+  // });
 };
 
 // Sets the activeNote and displays it
@@ -103,6 +113,8 @@ const handleRenderSaveBtn = function () {
 
 // Render's the list of note titles
 const renderNoteList = (notes) => {
+  // console.log("under renderNoteList" + renderNoteList);
+
   $noteList.empty();
 
   const noteListItems = [];
@@ -136,8 +148,16 @@ const renderNoteList = (notes) => {
 };
 
 // Gets notes from the db and renders them to the sidebar
-const getAndRenderNotes = () => {
-  return getNotes().then(renderNoteList);
+// const getAndRenderNotes = () => {
+//   return getNotes().then(renderNoteList);
+// };
+
+// Gets notes from the db and renders them to the sidebar
+var getAndRenderNotes = function() {
+  return getNotes().then(function(data) {
+    // console.log("under getAndRenderNotes data" + data);
+    renderNoteList(data);
+  });
 };
 
 $saveNoteBtn.on("click", handleNoteSave);
