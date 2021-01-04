@@ -10,7 +10,6 @@ module.exports = app => {
 
     fs.readFile('db/db.json', "utf8", (err, data) => {
 
-        // console.log(err);
         if (err) throw err;
 
         var notes = JSON.parse(data);
@@ -19,7 +18,7 @@ module.exports = app => {
         // =============================================================
         app.get("/api/notes", function (req, res) {
             res.json(notes);
-        });
+        }); // APP GET API
 
         // post new notes
         app.post("/api/notes", function (req, res) {
@@ -40,14 +39,7 @@ module.exports = app => {
                 }
                 return console.log("newNote added " + newNote.title);
             });  
-
-        });
-
-        // // Retrieves a note with specific id
-        // app.get("/api/notes/:id", function (req, res) {
-        //     // console.log(res.json(notes[req.params.id]));
-        //     res.json(notes[req.params.id]);
-        // });
+        }); // APP POST API
 
         // Deletes a note with specific id
         app.delete("/api/notes/:id", function (req, res) {
@@ -65,7 +57,7 @@ module.exports = app => {
                 }
                 return true;
             });
-        });
+        }); // APP DELETE API
 
 
         // Routes
